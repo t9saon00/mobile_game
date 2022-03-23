@@ -6,12 +6,17 @@ using UnityEngine;
     {
     
         public Joystick joystic;
-        public GameObject bullet; 
         public float moveSpeed;
         public float turnSpeed;
-        private Rigidbody2D rb;
-        public Camera cam;
+
+        public Rigidbody2D rb;
         Vector2 move;
+    
+        // Start is called before the first frame update
+        void Start()
+        {
+
+        }
 
         void Update() {
             float moveHorizontal = joystic.Horizontal;
@@ -23,44 +28,38 @@ using UnityEngine;
     
             if ((angleDiff > 1.0f) && (moveHorizontal != 0f || moveVertical != 0f)) // Turning
             {
-                Debug.Log("Turning");
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, newHeading, turnSpeed * Time.deltaTime);
-                transform.position += new Vector3(moveHorizontal * moveSpeed * Time.deltaTime, moveVertical * moveSpeed * Time.deltaTime, 0);          
+                transform.position += new Vector3(moveHorizontal * moveSpeed * Time.deltaTime, moveVertical * moveSpeed * Time.deltaTime, 0);  
+                //rb.AddForce(transform.right * moveSpeed,  ForceMode2D.Force);       
             }
             else if ((angleDiff < 1.0f) && (moveHorizontal != 0f || moveVertical != 0f)) // Moving
             {
-                Debug.Log("Moving");
-                transform.position += new Vector3(moveHorizontal * moveSpeed * Time.deltaTime, moveVertical * moveSpeed * Time.deltaTime, 0);          
+                transform.position += new Vector3(moveHorizontal * moveSpeed * Time.deltaTime, moveVertical * moveSpeed * Time.deltaTime, 0);  
+                //rb.AddForce(transform.right * moveSpeed,  ForceMode2D.Force);        
             }
             else // Stationary
             {
-                Debug.Log("Stationary");
-                // Do something here... idle animation, audio, etc.
+                //rb.velocity = Vector2.zero; 
             }
 
         }
-    
-        // Start is called before the first frame update
-        void Start()
-        {
-            rb = GetComponent<Rigidbody2D>();
-        }
+
 
         // Update is called once per frame
        void FixedUpdate()
         {
-            if(joystic.Horizontal != 0 || joystic.Vertical != 0  )
+            /*if(joystic.Horizontal != 0 || joystic.Vertical != 0  )
             {
-                rb.velocity = new Vector2(joystic.Horizontal * moveSpeed, joystic.Vertical * moveSpeed);
+                //rb.velocity = new Vector2(joystic.Horizontal * moveSpeed, joystic.Vertical * moveSpeed);
+                //mov = Input.GetAxis ("Vertical") * Time.deltaTime * 100.0f;
+                rb.AddForce(transform.right * moveSpeed,  ForceMode2D.Force);
             }
             else
             {
-                rb.velocity = Vector2.zero;
-            }
-        } 
-
-        public void Shoot() {
-            
+               rb.velocity = Vector2.zero;
+            } */
         }
+
+
 
     } 
