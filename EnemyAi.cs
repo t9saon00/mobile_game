@@ -10,6 +10,12 @@ public class EnemyAi : MonoBehaviour
     public float turnSpeed;
     public bool shouldRotate;
 
+    public Transform firePoint;
+    public float bulletForce = 20f;
+    public GameObject enemyBulletPrefab;
+    public float ShootingPeriod = 0.0f;
+    public float interpolationPeriod = 0.1f;
+
     public LayerMask whatIsPlayer; 
 
     private Transform target;
@@ -17,7 +23,7 @@ public class EnemyAi : MonoBehaviour
     //private Animator anim;
     private Vector2 movement;  
     public Vector3 dir;
-
+ 
     private bool isInChaseRange;
     private bool isInAttackRange;
 
@@ -40,12 +46,26 @@ public class EnemyAi : MonoBehaviour
         //transform.rotation = Quaternion.RotateTowards(transform.rotation, target.rotation, turnSpeed * Time.deltaTime);
 
         var offset = 0f; 
-        transform.rotation = Quaternion.Euler(Vector3.forward * (angle + offset));
+
+        if(isInChaseRange) { 
+            transform.rotation = Quaternion.Euler(Vector3.forward * (angle + offset));
+        }
 
         if(shouldRotate){
             //anim.SetFloat("X", dir.x);
             //anim.SetFloat("Y", dir.y);
         }
+
+
+        ShootingPeriod += Time.deltaTime;
+
+        if(isInAttackRange && ShootingPeriod >= interpolationPeriod) {
+            ShootingPeriod = ShootingPeriod - interpolationPeriod;
+            Shooting();
+            
+        }
+        
+        ShootingPeriod += UnityEngine.Time.deltaTime;
     }
 
     private void FixedUpdate() {
@@ -55,11 +75,22 @@ public class EnemyAi : MonoBehaviour
 
         if(isInAttackRange) {
             rb.velocity = Vector2.zero;
+           
         }
-    }
+
+    } 
 
     private void MoveCharacter(Vector2 dir) {
         rb.MovePosition( (Vector2)transform.position + (dir * speed * Time.deltaTime) );
+    }
+
+    public void Shooting(){
+        //Debug.Log("boom");
+        GameObject bullet = Instantiate(enemyBulletPrefab, firePoint.position, firePoint.rotation);
+        //Debug.Log(bullet);
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>(); 
+        rb.AddForce(firePoint.right * bulletForce, ForceMode2D.Impulse);
+        Destroy(bullet, 5); // Destroy bullet instance after 5 seconds
     }
 
 }
