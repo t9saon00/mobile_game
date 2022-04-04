@@ -6,16 +6,32 @@ using UnityEngine;
     {
     
         public Joystick joystic;
-        public GameObject bullet; 
-        public float moveSpeed;
+        public float initialSpeed;
+        private float moveSpeed;
+        public float runSpeed;
         public float turnSpeed;
-        private Rigidbody2D rb;
-        public Camera cam;
-        Vector2 move;
+        public string target;
+        private bool collisionDetect = false;
+        public Rigidbody2D rb;
+        private Vector2 moveInput;
+        public float health;   
 
-        void Update() {
+        public AudioSource audioSource2; 
+        public AudioClip walk;
+
+        // Start is called before the first frame update
+        void Start()
+        {
+            moveSpeed = initialSpeed;
+            //audioSource2 = GetComponent<AudioSource>(); 
+        }
+
+        void FixedUpdate() {
             float moveHorizontal = joystic.Horizontal;
             float moveVertical = joystic.Vertical;
+
+            moveInput = new Vector2(moveHorizontal, moveVertical);
+
             float headingAngle = Mathf.Atan2(moveVertical, moveHorizontal) * Mathf.Rad2Deg;
             if (headingAngle < 0) headingAngle += 360f;
             Quaternion newHeading = Quaternion.Euler(0f, 0f, headingAngle);
@@ -23,44 +39,42 @@ using UnityEngine;
     
             if ((angleDiff > 1.0f) && (moveHorizontal != 0f || moveVertical != 0f)) // Turning
             {
-                Debug.Log("Turning");
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, newHeading, turnSpeed * Time.deltaTime);
-                transform.position += new Vector3(moveHorizontal * moveSpeed * Time.deltaTime, moveVertical * moveSpeed * Time.deltaTime, 0);          
+                //transform.position += new Vector3(moveHorizontal * moveSpeed * Time.deltaTime, moveVertical * moveSpeed * Time.deltaTime, 0);  
+                rb.position += moveInput * moveSpeed;       
             }
             else if ((angleDiff < 1.0f) && (moveHorizontal != 0f || moveVertical != 0f)) // Moving
             {
-                Debug.Log("Moving");
-                transform.position += new Vector3(moveHorizontal * moveSpeed * Time.deltaTime, moveVertical * moveSpeed * Time.deltaTime, 0);          
+                if(!audioSource2.isPlaying){
+                    audioSource2.PlayOneShot(walk, 0.7F);
+                } 
+                
+                //transform.position += new Vector3(moveHorizontal * moveSpeed * Time.deltaTime, moveVertical * moveSpeed * Time.deltaTime, 0);  
+                rb.position += moveInput * moveSpeed;        
             }
             else // Stationary
             {
-                Debug.Log("Stationary");
-                // Do something here... idle animation, audio, etc.
+                rb.velocity = Vector2.zero; 
+                audioSource2.Stop();
             }
 
         }
-    
-        // Start is called before the first frame update
-        void Start()
-        {
-            rb = GetComponent<Rigidbody2D>();
+
+
+        public void RunDown(){
+            moveSpeed = runSpeed;
+        }
+        public void RunUp(){
+            moveSpeed = initialSpeed;
         }
 
-        // Update is called once per frame
-       void FixedUpdate()
-        {
-            if(joystic.Horizontal != 0 || joystic.Vertical != 0  )
-            {
-                rb.velocity = new Vector2(joystic.Horizontal * moveSpeed, joystic.Vertical * moveSpeed);
-            }
-            else
-            {
-                rb.velocity = Vector2.zero;
-            }
-        } 
-
-        public void Shoot() {
+        private void OnTriggerEnter2D(Collider2D collision) {
             
+            if(collision.CompareTag("wall")){
+                Debug.Log("testi");
+                rb.position = Vector2.zero; 
+            } 
         }
+
 
     } 
